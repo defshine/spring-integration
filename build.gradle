@@ -131,7 +131,8 @@ subprojects { subproject ->
 		springDataJpaVersion = '1.10.1.RELEASE'
 		springDataMongoVersion = '1.9.1.RELEASE'
 		springDataRedisVersion = '1.7.1.RELEASE'
-		springGemfireVersion = '1.8.1.RELEASE'
+		springGemfireVersion = '2.0.0.BUILD-SNAPSHOT'
+		springIntegrationVersion = "4.3.8.RELEASE"
 		springSecurityVersion = '4.1.0.RELEASE'
 		springSocialTwitterVersion = '1.1.2.RELEASE'
 		springRetryVersion = '1.1.3.RELEASE'
@@ -356,7 +357,8 @@ project('spring-integration-ftp') {
 project('spring-integration-gemfire') {
 	description = 'Spring Integration GemFire Support'
 	dependencies {
-		compile project(":spring-integration-core")
+//		compile project(":spring-integration-core")
+		compile "org.springframework.integration:spring-integration-core:$springIntegrationVersion"
 		compile ("org.springframework.data:spring-data-gemfire:$springGemfireVersion") {
 			exclude group: 'org.springframework', module: 'spring-aop'
 			exclude group: 'org.springframework', module: 'spring-beans'
