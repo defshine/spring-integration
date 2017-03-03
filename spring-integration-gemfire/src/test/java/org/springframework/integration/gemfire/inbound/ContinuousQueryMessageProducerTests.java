@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,10 @@ package org.springframework.integration.gemfire.inbound;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
+import org.apache.geode.cache.Operation;
+import org.apache.geode.cache.query.CqEvent;
+import org.apache.geode.cache.query.CqQuery;
+import org.apache.geode.cache.query.internal.cq.ServerCQImpl;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -29,11 +33,6 @@ import org.springframework.integration.channel.DirectChannel;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
-
-import com.gemstone.gemfire.cache.Operation;
-import com.gemstone.gemfire.cache.query.CqEvent;
-import com.gemstone.gemfire.cache.query.CqQuery;
-import com.gemstone.gemfire.cache.query.internal.CqQueryImpl;
 
 /**
  * @author David Turanski
@@ -107,7 +106,7 @@ public class ContinuousQueryMessageProducerTests {
 
 		return new CqEvent() {
 
-			final CqQuery cq = new CqQueryImpl();
+			final CqQuery cq = new ServerCQImpl();
 
 			final byte[] ba = new byte[0];
 

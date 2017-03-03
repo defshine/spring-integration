@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.geode.cache.query.CqEvent;
 
 import org.springframework.data.gemfire.listener.ContinuousQueryDefinition;
 import org.springframework.data.gemfire.listener.ContinuousQueryListener;
@@ -30,12 +31,10 @@ import org.springframework.integration.endpoint.ExpressionMessageProducerSupport
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 
-import com.gemstone.gemfire.cache.query.CqEvent;
-
 /**
  * Responds to a Gemfire continuous query (set using the #query field) that is
  * constantly evaluated against a cache
- * {@link com.gemstone.gemfire.cache.Region}. This is much faster than
+ * {@link org.apache.geode.cache.Region}. This is much faster than
  * re-querying the cache manually.
  *
  * @author Josh Long

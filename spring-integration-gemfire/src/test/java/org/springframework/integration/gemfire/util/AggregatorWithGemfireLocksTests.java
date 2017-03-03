@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016 the original author or authors.
+ * Copyright 2014-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,17 +103,12 @@ public class AggregatorWithGemfireLocksTests {
 	public void testDistributedAggregator() throws Exception {
 		this.releaseStrategy.reset(1);
 		Executors.newSingleThreadExecutor().execute(asyncSend("foo", 1, 1));
-		Executors.newSingleThreadExecutor().execute(new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					in2.send(new GenericMessage<String>("bar", stubHeaders(2, 2, 1)));
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-					exception = e;
-				}
+		Executors.newSingleThreadExecutor().execute(() -> {
+			try {
+				in2.send(new GenericMessage<String>("bar", stubHeaders(2, 2, 1)));
+			}
+			catch (Exception e) {
+				exception = e;
 			}
 		});
 		assertTrue(this.releaseStrategy.latch2.await(10, TimeUnit.SECONDS));
@@ -124,17 +119,12 @@ public class AggregatorWithGemfireLocksTests {
 	}
 
 	private Runnable asyncSend(final String payload, final int sequence, final int correlation) {
-		return new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					in.send(new GenericMessage<String>(payload, stubHeaders(sequence, 2, correlation)));
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-					exception = e;
-				}
+		return () -> {
+			try {
+				in.send(new GenericMessage<String>(payload, stubHeaders(sequence, 2, correlation)));
+			}
+			catch (Exception e) {
+				exception = e;
 			}
 		};
 	}

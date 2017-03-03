@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 the original author or authors.
+ * Copyright 2013-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,9 @@ import static org.junit.Assert.fail;
 
 import java.util.concurrent.TimeUnit;
 
+import org.apache.geode.cache.Cache;
+import org.apache.geode.cache.Region;
+import org.apache.geode.cache.Scope;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -53,7 +56,9 @@ public class DelayerHandlerRescheduleIntegrationTests {
 
 	public static final String DELAYER_ID = "delayerWithGemfireMS";
 
-	public static CacheFactoryBean cacheFactoryBean;
+	public static Region<Object, Object> region;
+
+	private static CacheFactoryBean cacheFactoryBean;
 
 	@ClassRule
 	public static LongRunningIntegrationTest longTests = new LongRunningIntegrationTest();
@@ -62,10 +67,15 @@ public class DelayerHandlerRescheduleIntegrationTests {
 	public static void startUp() throws Exception {
 		cacheFactoryBean = new CacheFactoryBean();
 		cacheFactoryBean.afterPropertiesSet();
+		Cache cache = cacheFactoryBean.getObject();
+		region = cache.createRegionFactory().setScope(Scope.LOCAL).create("sig-tests");
 	}
 
 	@AfterClass
 	public static void cleanUp() throws Exception {
+		if (region != null) {
+			region.close();
+		}
 		if (cacheFactoryBean != null) {
 			cacheFactoryBean.destroy();
 		}
@@ -130,7 +140,7 @@ public class DelayerHandlerRescheduleIntegrationTests {
 		assertEquals(1, messageStore.getMessageGroupCount());
 		int n = 0;
 		while (n++ < 200 && messageStore.messageGroupSize(delayerMessageGroupId) > 0) {
-			Thread.sleep(50);
+			Thread.sleep(100);
 		}
 		assertEquals(0, messageStore.messageGroupSize(delayerMessageGroupId));
 

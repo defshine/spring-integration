@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.geode.cache.Cache;
+import org.apache.geode.cache.Region;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.gemfire.RegionAttributesFactoryBean;
 import org.springframework.data.gemfire.RegionFactoryBean;
@@ -28,9 +31,6 @@ import org.springframework.integration.store.MessageGroupStore;
 import org.springframework.integration.store.MessageStore;
 import org.springframework.util.Assert;
 import org.springframework.util.PatternMatchUtils;
-
-import com.gemstone.gemfire.cache.Cache;
-import com.gemstone.gemfire.cache.Region;
 
 /**
  * Gemfire implementation of the key/value style {@link MessageStore} and
@@ -62,25 +62,12 @@ public class GemfireMessageStore extends AbstractKeyValueMessageStore implements
 		this.messageStoreRegion = messageStoreRegion;
 	}
 
-	/**
-	 * Provides a cache reference used to create a message store region named
-	 * 'messageStoreRegion'
-	 * @param cache The cache.
-	 *
-	 * @deprecated - use the other constructor and provide a region directly.
-	 */
-	@Deprecated
-	public GemfireMessageStore(Cache cache) {
-		Assert.notNull(cache, "'cache' must not be null");
-		this.cache = cache;
-	}
-
 	public void setIgnoreJta(boolean ignoreJta) {
 		this.ignoreJta = ignoreJta;
 	}
 
 	@Override
-	@SuppressWarnings({ "unchecked", "deprecation" })
+	@SuppressWarnings("unchecked")
 	public void afterPropertiesSet() {
 		if (this.messageStoreRegion != null) {
 			return;
@@ -94,7 +81,9 @@ public class GemfireMessageStore extends AbstractKeyValueMessageStore implements
 			RegionAttributesFactoryBean attributesFactoryBean = new RegionAttributesFactoryBean();
 			attributesFactoryBean.setIgnoreJTA(this.ignoreJta);
 			attributesFactoryBean.afterPropertiesSet();
-			RegionFactoryBean<Object, Object> messageRegionFactoryBean = new RegionFactoryBean<Object, Object>() { };
+			RegionFactoryBean<Object, Object> messageRegionFactoryBean = new RegionFactoryBean<Object, Object>() {
+
+			};
 			messageRegionFactoryBean.setBeanName(MESSAGE_STORE_REGION_NAME);
 			messageRegionFactoryBean.setAttributes(attributesFactoryBean.getObject());
 			messageRegionFactoryBean.setCache(this.cache);
@@ -117,6 +106,17 @@ public class GemfireMessageStore extends AbstractKeyValueMessageStore implements
 		Assert.notNull(id, "'id' must not be null");
 		Assert.notNull(objectToStore, "'objectToStore' must not be null");
 		this.messageStoreRegion.put(id, objectToStore);
+	}
+
+	@Override
+	protected void doStoreIfAbsent(Object id, Object objectToStore) {
+		Assert.notNull(id, "'id' must not be null");
+		Assert.notNull(objectToStore, "'objectToStore' must not be null");
+		Object present = this.messageStoreRegion.putIfAbsent(id, objectToStore);
+		if (present != null && logger.isDebugEnabled()) {
+			logger.debug("The message: [" + present + "] is already present in the store. " +
+					"The [" + objectToStore + "] is ignored.");
+		}
 	}
 
 	@Override
